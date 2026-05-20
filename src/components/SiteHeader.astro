@@ -40,7 +40,7 @@ const languageHref = localizePath(currentPath, otherLocale);
   >
     <a
       href={homeHref}
-      class="flex items-center gap-3 text-whitewash transition-colors duration-300 group-hover:text-aegean-deep group-data-scrolled:text-aegean-deep"
+      class="site-header-brand flex items-center gap-3 text-whitewash transition-colors duration-300 group-hover:text-aegean-deep group-data-scrolled:text-aegean-deep"
     >
       <span
         class="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-linear-to-br from-aegean to-shallow shadow-[0_6px_18px_rgba(14,61,87,0.25)]"
@@ -56,7 +56,7 @@ const languageHref = localizePath(currentPath, otherLocale);
       </span>
     </a>
 
-    <div class="hidden items-center gap-9 text-[11px] font-semibold uppercase tracking-[0.18em] text-whitewash/85 transition-colors duration-300 group-hover:text-ink-soft group-data-scrolled:text-ink-soft md:flex">
+    <div class="site-header-nav hidden items-center gap-9 text-[11px] font-semibold uppercase tracking-[0.18em] text-whitewash/85 transition-colors duration-300 group-hover:text-ink-soft group-data-scrolled:text-ink-soft md:flex">
       {
         navItems.map((item) => (
           <a
@@ -64,6 +64,10 @@ const languageHref = localizePath(currentPath, otherLocale);
               "relative py-1 transition-colors hover:text-clay after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-center after:scale-x-0 after:bg-clay after:transition-transform after:duration-300 hover:after:scale-x-100",
               item.mega === "peninsulas" && "mega-menu-trigger",
             ]}
+            data-mega-trigger={item.mega === "peninsulas" ? "" : undefined}
+            aria-haspopup={item.mega === "peninsulas" ? "true" : undefined}
+            aria-expanded={item.mega === "peninsulas" ? "false" : undefined}
+            aria-controls={item.mega === "peninsulas" ? "peninsulas-mega-menu" : undefined}
             href={item.href}
           >
             {item.label}
@@ -74,15 +78,15 @@ const languageHref = localizePath(currentPath, otherLocale);
 
     <div class="flex items-center gap-5">
       <div class="hidden items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] md:flex">
-        <span class="text-whitewash transition-colors duration-300 group-hover:text-aegean-deep group-data-scrolled:text-aegean-deep">
+        <span class="site-header-locale-current text-whitewash transition-colors duration-300 group-hover:text-aegean-deep group-data-scrolled:text-aegean-deep">
           {locale.toUpperCase()}
         </span>
         <span
-          class="h-3 w-px bg-whitewash/35 transition-colors duration-300 group-hover:bg-sand-deep group-data-scrolled:bg-sand-deep"
+          class="site-header-locale-divider h-3 w-px bg-whitewash/35 transition-colors duration-300 group-hover:bg-sand-deep group-data-scrolled:bg-sand-deep"
           aria-hidden="true"
         />
         <a
-          class="text-whitewash/55 transition-colors duration-300 hover:text-clay group-hover:text-ink-soft/70 group-hover:hover:text-clay group-data-scrolled:text-ink-soft/70 group-data-scrolled:hover:text-clay"
+          class="site-header-locale-link text-whitewash/55 transition-colors duration-300 hover:text-clay group-hover:text-ink-soft/70 group-hover:hover:text-clay group-data-scrolled:text-ink-soft/70 group-data-scrolled:hover:text-clay"
           href={languageHref}
         >
           {otherLocale.toUpperCase()}
@@ -113,7 +117,7 @@ const languageHref = localizePath(currentPath, otherLocale);
         data-mobile-menu-open
         aria-label="Open menu"
         aria-controls="mobile-menu"
-        class="-mr-1 p-2 text-whitewash transition-colors duration-300 group-hover:text-aegean-deep group-data-scrolled:text-aegean-deep md:hidden"
+        class="site-header-mobile-open -mr-1 p-2 text-whitewash transition-colors duration-300 group-hover:text-aegean-deep group-data-scrolled:text-aegean-deep md:hidden"
       >
         <svg
           viewBox="0 0 24 24"
@@ -130,7 +134,11 @@ const languageHref = localizePath(currentPath, otherLocale);
     </div>
   </nav>
 
-  <div class="mega-menu-panel absolute inset-x-0 top-full hidden border-t border-sand-deep/30 bg-whitewash/95 backdrop-blur md:block">
+  <div
+    id="peninsulas-mega-menu"
+    data-mega-panel
+    class="mega-menu-panel absolute inset-x-0 top-full hidden border-t border-sand-deep/30 bg-whitewash/95 backdrop-blur md:block"
+  >
     <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <div class="grid grid-cols-3 gap-4 lg:gap-6">
         {
@@ -255,6 +263,58 @@ const languageHref = localizePath(currentPath, otherLocale);
     };
     sync();
     window.addEventListener("scroll", sync, { passive: true });
+
+    const megaTrigger = header.querySelector<HTMLElement>("[data-mega-trigger]");
+    const megaPanel = header.querySelector<HTMLElement>("[data-mega-panel]");
+
+    if (megaTrigger && megaPanel) {
+      const desktopMenuQuery = window.matchMedia("(min-width: 768px)");
+
+      const openMegaMenu = () => {
+        if (!desktopMenuQuery.matches) return;
+        header.setAttribute("data-mega-open", "");
+        megaTrigger.setAttribute("aria-expanded", "true");
+      };
+
+      const closeMegaMenu = () => {
+        header.removeAttribute("data-mega-open");
+        megaTrigger.setAttribute("aria-expanded", "false");
+      };
+
+      megaTrigger.addEventListener("pointerenter", openMegaMenu);
+      megaTrigger.addEventListener("focus", openMegaMenu);
+      megaPanel.addEventListener("pointerenter", openMegaMenu);
+
+      header.querySelectorAll<HTMLElement>("a, button").forEach((control) => {
+        if (control === megaTrigger || megaPanel.contains(control)) return;
+        control.addEventListener("pointerenter", closeMegaMenu);
+        control.addEventListener("focus", closeMegaMenu);
+      });
+
+      megaPanel.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", closeMegaMenu);
+      });
+
+      document.addEventListener("pointerdown", (event) => {
+        if (event.target instanceof Node && !header.contains(event.target)) {
+          closeMegaMenu();
+        }
+      });
+
+      document.addEventListener("focusin", (event) => {
+        if (event.target instanceof Node && !header.contains(event.target)) {
+          closeMegaMenu();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && header.hasAttribute("data-mega-open")) {
+          closeMegaMenu();
+        }
+      });
+
+      desktopMenuQuery.addEventListener("change", closeMegaMenu);
+    }
   }
 
   const openBtn = document.querySelector<HTMLButtonElement>("[data-mobile-menu-open]");

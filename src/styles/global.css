@@ -85,6 +85,35 @@ img {
     transform 250ms ease;
 }
 
+header[data-mega-open] {
+  border-color: rgb(201 180 142 / 0.4);
+  background-color: rgb(251 248 242 / 0.95);
+  color: var(--color-ink);
+  backdrop-filter: blur(12px);
+}
+
+header[data-mega-open] .site-header-brand,
+header[data-mega-open] .site-header-locale-current,
+header[data-mega-open] .site-header-mobile-open {
+  color: var(--color-aegean-deep);
+}
+
+header[data-mega-open] .site-header-nav {
+  color: var(--color-ink-soft);
+}
+
+header[data-mega-open] .site-header-locale-divider {
+  background-color: var(--color-sand-deep);
+}
+
+header[data-mega-open] .site-header-locale-link {
+  color: rgb(81 96 106 / 0.7);
+}
+
+header[data-mega-open] .site-header-locale-link:hover {
+  color: var(--color-clay);
+}
+
 .mega-menu-panel::before {
   content: "";
   position: absolute;
@@ -94,6 +123,7 @@ img {
   height: 28px;
 }
 
+header[data-mega-open] .mega-menu-panel,
 header:has(.mega-menu-trigger:hover) .mega-menu-panel,
 header:has(.mega-menu-trigger:focus-visible) .mega-menu-panel,
 .mega-menu-panel:hover,
