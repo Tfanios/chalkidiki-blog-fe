@@ -31,7 +31,8 @@ const languageHref = localizePath(currentPath, otherLocale);
 ---
 
 <header
-  class="group fixed inset-x-0 top-0 z-30 border-b border-transparent bg-transparent text-whitewash backdrop-blur-0 transition duration-300 hover:border-sand-deep/40 hover:bg-whitewash/95 hover:text-ink hover:backdrop-blur-md"
+  data-site-header
+  class="group fixed inset-x-0 top-0 z-30 border-b border-transparent bg-transparent text-whitewash backdrop-blur-0 transition duration-300 hover:border-sand-deep/40 hover:bg-whitewash/95 hover:text-ink hover:backdrop-blur-md data-scrolled:border-sand-deep/40 data-scrolled:bg-whitewash/95 data-scrolled:text-ink data-scrolled:backdrop-blur-md"
 >
   <nav
     class="mx-auto flex max-w-6xl items-center justify-between gap-8 px-4 py-5 sm:px-6 lg:px-8"
@@ -39,7 +40,7 @@ const languageHref = localizePath(currentPath, otherLocale);
   >
     <a
       href={homeHref}
-      class="flex items-center gap-3 text-whitewash transition-colors duration-300 group-hover:text-aegean-deep"
+      class="flex items-center gap-3 text-whitewash transition-colors duration-300 group-hover:text-aegean-deep group-data-scrolled:text-aegean-deep"
     >
       <span
         class="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-linear-to-br from-aegean to-shallow shadow-[0_6px_18px_rgba(14,61,87,0.25)]"
@@ -55,7 +56,7 @@ const languageHref = localizePath(currentPath, otherLocale);
       </span>
     </a>
 
-    <div class="hidden items-center gap-9 text-[11px] font-semibold uppercase tracking-[0.18em] text-whitewash/85 transition-colors duration-300 group-hover:text-ink-soft md:flex">
+    <div class="hidden items-center gap-9 text-[11px] font-semibold uppercase tracking-[0.18em] text-whitewash/85 transition-colors duration-300 group-hover:text-ink-soft group-data-scrolled:text-ink-soft md:flex">
       {
         navItems.map((item) => (
           <a
@@ -73,15 +74,15 @@ const languageHref = localizePath(currentPath, otherLocale);
 
     <div class="flex items-center gap-5">
       <div class="hidden items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] md:flex">
-        <span class="text-whitewash transition-colors duration-300 group-hover:text-aegean-deep">
+        <span class="text-whitewash transition-colors duration-300 group-hover:text-aegean-deep group-data-scrolled:text-aegean-deep">
           {locale.toUpperCase()}
         </span>
         <span
-          class="h-3 w-px bg-whitewash/35 transition-colors duration-300 group-hover:bg-sand-deep"
+          class="h-3 w-px bg-whitewash/35 transition-colors duration-300 group-hover:bg-sand-deep group-data-scrolled:bg-sand-deep"
           aria-hidden="true"
         />
         <a
-          class="text-whitewash/55 transition-colors duration-300 hover:text-clay group-hover:text-ink-soft/70 group-hover:hover:text-clay"
+          class="text-whitewash/55 transition-colors duration-300 hover:text-clay group-hover:text-ink-soft/70 group-hover:hover:text-clay group-data-scrolled:text-ink-soft/70 group-data-scrolled:hover:text-clay"
           href={languageHref}
         >
           {otherLocale.toUpperCase()}
@@ -112,7 +113,7 @@ const languageHref = localizePath(currentPath, otherLocale);
         data-mobile-menu-open
         aria-label="Open menu"
         aria-controls="mobile-menu"
-        class="-mr-1 p-2 text-whitewash transition-colors duration-300 group-hover:text-aegean-deep md:hidden"
+        class="-mr-1 p-2 text-whitewash transition-colors duration-300 group-hover:text-aegean-deep group-data-scrolled:text-aegean-deep md:hidden"
       >
         <svg
           viewBox="0 0 24 24"
@@ -242,6 +243,20 @@ const languageHref = localizePath(currentPath, otherLocale);
 </div>
 
 <script>
+  const header = document.querySelector<HTMLElement>("[data-site-header]");
+  if (header) {
+    const threshold = 16;
+    const sync = () => {
+      if (window.scrollY > threshold) {
+        header.setAttribute("data-scrolled", "");
+      } else {
+        header.removeAttribute("data-scrolled");
+      }
+    };
+    sync();
+    window.addEventListener("scroll", sync, { passive: true });
+  }
+
   const openBtn = document.querySelector<HTMLButtonElement>("[data-mobile-menu-open]");
   const closeBtn = document.querySelector<HTMLButtonElement>("[data-mobile-menu-close]");
   const menu = document.querySelector<HTMLElement>("[data-mobile-menu]");
