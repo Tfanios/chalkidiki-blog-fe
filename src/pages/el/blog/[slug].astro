@@ -1,0 +1,89 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import PostCard from "../../../components/PostCard.astro";
+import { getPosts } from "../../../lib/posts";
+import { ui } from "../../../lib/i18n";
+
+export function getStaticPaths() {
+  return getPosts("el").map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const formattedDate = new Intl.DateTimeFormat("el", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+}).format(new Date(post.publishedAt));
+
+const morePosts = getPosts("el")
+  .filter((p) => p.slug !== post.slug)
+  .slice(0, 3);
+const t = ui.el;
+---
+
+<BaseLayout title={post.title} description={post.excerpt} locale="el">
+  <article class="bg-whitewash">
+    <section class="px-4 pt-28 pb-12 sm:px-6 lg:px-8 lg:pt-36 lg:pb-16">
+      <div class="mx-auto max-w-4xl">
+        <h1 class="text-center font-serif text-3xl font-medium uppercase leading-tight text-aegean-deep sm:text-4xl lg:text-5xl">
+          {post.title}
+        </h1>
+      </div>
+      <div class="mx-auto mt-12 max-w-6xl lg:mt-16">
+        <img
+          class="aspect-video w-full rounded-2xl object-cover"
+          src={post.cover.src}
+          alt={post.cover.alt}
+          loading="eager"
+        />
+      </div>
+    </section>
+
+    <section class="px-4 pb-20 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-sm font-semibold text-ink">{post.author}</p>
+        <p class="mt-1 text-xs text-ink-soft">
+          <time datetime={post.publishedAt}>{formattedDate}</time>
+          {" • "}
+          {post.readTime}
+        </p>
+
+        <h2 class="mt-10 font-serif text-3xl font-medium leading-tight text-aegean-deep sm:text-4xl lg:text-5xl">
+          {post.title}
+        </h2>
+
+        <p class="mt-6 text-base leading-7 text-ink-soft">{post.excerpt}</p>
+
+        <div class="mt-8 space-y-6 text-base leading-7 text-ink-soft">
+          {post.content.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
+
+        <a
+          href="/el/#newsletter"
+          class="mt-12 inline-flex rounded-lg bg-aegean-deep px-6 py-3 text-sm font-semibold text-whitewash transition hover:bg-aegean"
+        >
+          {t.blog.planTrip}
+        </a>
+      </div>
+    </section>
+
+    {
+      morePosts.length > 0 && (
+        <section class="border-t border-sand-deep/30 px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+          <div class="mx-auto max-w-6xl">
+            <h2 class="font-serif text-4xl font-medium uppercase leading-tight text-aegean-deep sm:text-5xl lg:text-6xl">
+              {t.blog.moreTitle}
+            </h2>
+            <p class="mt-4 text-base text-ink-soft">{t.blog.moreSubtitle}</p>
+            <div class="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+              {morePosts.map((p) => <PostCard post={p} locale="el" />)}
+            </div>
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>

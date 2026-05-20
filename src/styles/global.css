@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Mona Sans", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, ui-serif, serif;
+  --font-display: "Fraunces", Georgia, ui-serif, serif;
+  --color-aegean: #1b5e83;
+  --color-aegean-deep: #0e3d57;
+  --color-shallow: #5ba7b8;
+  --color-clay: #c75b3f;
+  --color-clay-deep: #9a3f28;
+  --color-olive: #6e7a52;
+  --color-sand: #e7d9c2;
+  --color-sand-deep: #c9b48e;
+  --color-whitewash: #fbf8f2;
+  --color-ink: #243137;
+  --color-ink-soft: #51606a;
+  --color-paper: #fbf8f2;
+  --color-cream: #fffaf4;
+  --color-forest: #0e3d57;
+  --color-moss: #e7d9c2;
+  --color-ocean: #5ba7b8;
+  --color-brass: #c75b3f;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--color-whitewash);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+img {
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--color-sand);
+  color: var(--color-aegean-deep);
+}
+
+@keyframes marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.marquee-left {
+  animation: marquee-left 42s linear infinite;
+}
+
+.marquee-right {
+  animation: marquee-right 42s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-left,
+  .marquee-right {
+    animation: none;
+  }
+}
+
+.mega-menu-panel {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition:
+    opacity 250ms ease,
+    transform 250ms ease;
+}
+
+header:has(.mega-menu-trigger:hover) .mega-menu-panel,
+header:has(.mega-menu-trigger:focus-visible) .mega-menu-panel,
+.mega-menu-panel:hover,
+.mega-menu-panel:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.mobile-menu {
+  opacity: 0;
+  transform: translateY(-12px);
+  pointer-events: none;
+  transition:
+    opacity 250ms ease,
+    transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.mobile-menu[data-open] {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}

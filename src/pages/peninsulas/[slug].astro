@@ -1,0 +1,89 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PeninsulaMap from "../../components/PeninsulaMap.astro";
+import PeninsulaStory from "../../components/PeninsulaStory.astro";
+import { getMapPins, getPeninsulas } from "../../lib/travel-home";
+import { ui } from "../../lib/i18n";
+
+const peninsulas = getPeninsulas("en");
+
+export function getStaticPaths() {
+  const peninsulas = getPeninsulas("en");
+
+  return peninsulas.map((peninsula) => ({
+    params: { slug: peninsula.slug },
+    props: { peninsula },
+  }));
+}
+
+const { peninsula } = Astro.props;
+const others = peninsulas.filter((p) => p.slug !== peninsula.slug);
+const pins = getMapPins(peninsula.slug);
+const t = ui.en;
+---
+
+<BaseLayout
+  title={peninsula.name}
+  description={peninsula.description}
+  locale="en"
+>
+  <section class="relative isolate min-h-[72svh] overflow-hidden bg-aegean-deep text-whitewash">
+    <img class="absolute inset-0 -z-20 h-full w-full object-cover" src={peninsula.image.src} alt={peninsula.image.alt} loading="eager" />
+    <div class="absolute inset-0 -z-10 bg-aegean-deep/55"></div>
+
+    <div class="mx-auto flex min-h-[72svh] max-w-5xl flex-col justify-end px-4 py-20 sm:px-6 lg:px-8">
+      <p class="text-xs font-semibold uppercase tracking-[0.24em] text-sand">{peninsula.tagline}</p>
+      <h1 class="mt-4 font-serif text-5xl font-medium uppercase leading-none sm:text-7xl lg:text-8xl">
+        {peninsula.name}
+      </h1>
+      <p class="mt-6 max-w-xl text-base leading-7 text-whitewash/85">{peninsula.description}</p>
+    </div>
+  </section>
+
+  <PeninsulaStory stories={peninsula.stories} groupId={`story-${peninsula.slug}`} />
+
+  <section class="bg-whitewash px-4 pb-20 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-5xl border-t border-sand-deep/30 pt-16">
+      <p class="text-xs font-semibold uppercase tracking-[0.14em] text-clay-deep">{t.map.eyebrow}</p>
+      <h2 class="mt-3 font-serif text-3xl font-medium uppercase leading-tight text-aegean-deep sm:text-4xl">
+        {t.map.title(peninsula.name)}
+      </h2>
+      <p class="mt-3 max-w-xl text-base leading-7 text-ink-soft">{t.map.subtitle}</p>
+      <div class="mt-10">
+        <PeninsulaMap center={peninsula.center} zoom={peninsula.zoom} pins={pins} mapId={peninsula.slug} />
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-whitewash px-4 pb-24 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-5xl border-t border-sand-deep/50 pt-16">
+      <h2 class="font-serif text-2xl font-medium uppercase leading-tight text-aegean-deep sm:text-3xl">
+        The other fingers
+      </h2>
+      <div class="mt-8 grid gap-6 sm:grid-cols-2">
+        {
+          others.map((other) => (
+            <a
+              href={`/peninsulas/${other.slug}`}
+              class="group relative block aspect-4/3 overflow-hidden rounded-2xl"
+            >
+              <img
+                class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                src={other.image.src}
+                alt={other.image.alt}
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-linear-to-t from-aegean-deep/85 via-aegean-deep/25 to-transparent" />
+              <div class="absolute inset-0 flex flex-col justify-end p-6 text-whitewash">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-sand">{other.tagline}</p>
+                <h3 class="mt-1 font-serif text-2xl font-medium uppercase leading-tight sm:text-3xl">
+                  {other.name}
+                </h3>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>

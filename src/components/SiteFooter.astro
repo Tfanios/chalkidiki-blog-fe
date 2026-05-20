@@ -1,0 +1,56 @@
+---
+import { type Locale, defaultLocale, localizePath, ui } from "../lib/i18n";
+
+type Props = {
+  locale?: Locale;
+};
+
+const year = new Date().getFullYear();
+const { locale = defaultLocale } = Astro.props;
+const t = ui[locale];
+const homeHref = localizePath("/", locale);
+
+const footerLinks = [
+  { href: localizePath("/#peninsulas", locale), label: t.nav.peninsulas },
+  { href: localizePath("/#food", locale), label: t.nav.featured },
+  { href: localizePath("/blog", locale), label: t.nav.journal },
+  { href: localizePath("/#contact", locale), label: t.nav.contact },
+  { href: localizePath("/#newsletter", locale), label: locale === "el" ? "Newsletter" : "Newsletter" },
+];
+
+const socials = [
+  { href: "#", label: "Instagram" },
+  { href: "#", label: "Facebook" },
+  { href: "#", label: "YouTube" },
+];
+---
+
+<footer class="border-t border-sand-deep/30 bg-whitewash text-ink-soft">
+  <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="grid gap-8 sm:grid-cols-[1.4fr_1fr_1fr]">
+      <div>
+        <a href={homeHref} class="font-serif text-lg font-medium text-aegean-deep">
+          i<span class="italic text-clay">Love</span> Chalkidiki
+        </a>
+        <p class="mt-3 max-w-xs text-sm leading-6">
+          {t.footer.blurb}
+        </p>
+      </div>
+      <div>
+        <p class="text-xs uppercase tracking-[0.14em] text-clay-deep">{t.footer.explore}</p>
+        <div class="mt-3 grid gap-2 text-sm">
+          {footerLinks.map((link) => <a class="hover:text-aegean" href={link.href}>{link.label}</a>)}
+        </div>
+      </div>
+      <div>
+        <p class="text-xs uppercase tracking-[0.14em] text-clay-deep">{t.footer.social}</p>
+        <div class="mt-3 grid gap-2 text-sm">
+          {socials.map((s) => <a class="hover:text-aegean" href={s.href}>{s.label}</a>)}
+        </div>
+      </div>
+    </div>
+    <p class="mt-10 border-t border-sand-deep/30 pt-6 text-xs text-ink-soft/80">
+      &copy; {year} iLove Chalkidiki. {t.footer.copyright}
+    </p>
+  </div>
+</footer>

@@ -1,0 +1,39 @@
+---
+import type { BlogPost } from "../lib/posts";
+import { type Locale, defaultLocale, localizePath } from "../lib/i18n";
+
+type Props = {
+  post: BlogPost;
+  locale?: Locale;
+};
+
+const { post, locale = defaultLocale } = Astro.props;
+const formattedDate = new Intl.DateTimeFormat(locale, {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+}).format(new Date(post.publishedAt));
+---
+
+<a href={localizePath(`/blog/${post.slug}`, locale)} class="group block">
+  <div class="aspect-video overflow-hidden rounded-2xl">
+    <img
+      class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+      src={post.cover.src}
+      alt={post.cover.alt}
+      loading="lazy"
+    />
+  </div>
+  <h2 class="mt-6 font-serif text-2xl font-medium leading-tight text-aegean-deep group-hover:text-aegean sm:text-3xl">
+    {post.title}
+  </h2>
+  <p class="mt-4 text-base leading-7 text-ink-soft">
+    {post.excerpt}
+  </p>
+  <p class="mt-6 text-sm font-semibold text-ink">{post.author}</p>
+  <p class="mt-1 text-xs text-ink-soft">
+    <time datetime={post.publishedAt}>{formattedDate}</time>
+    {" • "}
+    {post.readTime}
+  </p>
+</a>

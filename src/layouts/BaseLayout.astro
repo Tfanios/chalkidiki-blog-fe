@@ -1,0 +1,50 @@
+---
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import { type Locale, defaultLocale, localizePath, unlocalizePath } from "../lib/i18n";
+import "../styles/global.css";
+
+type Props = {
+  title?: string;
+  description?: string;
+  locale?: Locale;
+};
+
+const {
+  title = "iLove Chalkidiki",
+  description = "An editorial travel journal for Chalkidiki's food, hospitality, beaches, and three peninsulas.",
+  locale = defaultLocale,
+} = Astro.props;
+
+const pageTitle = title === "iLove Chalkidiki" ? title : `${title} | iLove Chalkidiki`;
+const canonicalPath = unlocalizePath(Astro.url.pathname);
+const alternateEn = localizePath(canonicalPath, "en");
+const alternateEl = localizePath(canonicalPath, "el");
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Mona+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" hreflang="en" href={alternateEn} />
+    <link rel="alternate" hreflang="el" href={alternateEl} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <SiteHeader locale={locale} currentPath={canonicalPath} />
+    <main>
+      <slot />
+    </main>
+    <SiteFooter locale={locale} />
+  </body>
+</html>

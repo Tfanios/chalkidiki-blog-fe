@@ -1,0 +1,72 @@
+---
+import type { GetStaticPaths } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { getPosts } from "../../lib/posts";
+import { ui } from "../../lib/i18n";
+
+export const getStaticPaths = (({ paginate }) => {
+  return paginate(getPosts("en"), { pageSize: 6 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const t = ui.en;
+---
+
+<BaseLayout
+  title="Journal"
+  description="Browse iLove Chalkidiki journal notes."
+  locale="en"
+>
+  <section class="px-4 pt-28 pb-12 sm:px-6 lg:px-8 lg:pt-36">
+    <div class="mx-auto max-w-4xl text-center">
+      <h1 class="font-serif text-4xl font-medium uppercase leading-tight text-aegean-deep sm:text-5xl lg:text-6xl">
+        {t.blog.indexTitle}
+      </h1>
+      <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-ink-soft">
+        {t.blog.indexSubtitle}
+      </p>
+    </div>
+  </section>
+
+  <section class="px-4 pb-20 sm:px-6 lg:px-8 lg:pb-28">
+    <div class="mx-auto max-w-6xl">
+      <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+        {page.data.map((post) => <PostCard post={post} locale="en" />)}
+      </div>
+
+      {
+        page.lastPage > 1 && (
+          <nav
+            class="mt-16 flex items-center justify-between gap-4 border-t border-sand-deep/30 pt-8"
+            aria-label="Pagination"
+          >
+            {page.url.prev ? (
+              <a
+                class="text-sm font-semibold text-aegean hover:text-clay-deep"
+                href={page.url.prev}
+              >
+                &larr; {t.blog.prev}
+              </a>
+            ) : (
+              <span aria-hidden="true" />
+            )}
+            <span class="text-xs uppercase tracking-[0.14em] text-ink-soft">
+              {page.currentPage} / {page.lastPage}
+            </span>
+            {page.url.next ? (
+              <a
+                class="text-sm font-semibold text-aegean hover:text-clay-deep"
+                href={page.url.next}
+              >
+                {t.blog.next} &rarr;
+              </a>
+            ) : (
+              <span aria-hidden="true" />
+            )}
+          </nav>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>

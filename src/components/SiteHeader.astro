@@ -1,0 +1,240 @@
+---
+import { type Locale, defaultLocale, localizePath, ui } from "../lib/i18n";
+import { getHomeContent } from "../lib/travel-home";
+
+type Props = {
+  locale?: Locale;
+  currentPath?: string;
+};
+
+const { locale = defaultLocale, currentPath = "/" } = Astro.props;
+const t = ui[locale];
+const { peninsulas } = getHomeContent(locale);
+
+type NavItem = {
+  href: string;
+  label: string;
+  mega?: "peninsulas";
+};
+
+const navItems: NavItem[] = [
+  { href: localizePath("/#peninsulas", locale), label: t.nav.peninsulas, mega: "peninsulas" },
+  { href: localizePath("/#food", locale), label: t.nav.featured },
+  { href: localizePath("/blog", locale), label: t.nav.journal },
+  { href: localizePath("/#contact", locale), label: t.nav.contact },
+];
+
+const homeHref = localizePath("/", locale);
+const planHref = localizePath("/#newsletter", locale);
+const otherLocale = locale === "en" ? "el" : "en";
+const languageHref = localizePath(currentPath, otherLocale);
+---
+
+<header
+  class="group fixed inset-x-0 top-0 z-30 border-b border-transparent bg-transparent text-whitewash backdrop-blur-0 transition duration-300 hover:border-sand-deep/30 hover:bg-whitewash/90 hover:text-ink hover:backdrop-blur"
+>
+  <nav
+    class="mx-auto flex max-w-5xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8"
+    aria-label="Main navigation"
+  >
+    <a
+      href={homeHref}
+      class="font-serif text-lg font-medium text-whitewash transition-colors duration-300 group-hover:text-aegean-deep"
+    >
+      i<span class="italic text-clay">Love</span> Chalkidiki
+    </a>
+
+    <div class="hidden items-center gap-7 text-sm text-whitewash/85 transition-colors duration-300 group-hover:text-ink-soft md:flex">
+      {
+        navItems.map((item) => (
+          <a
+            class:list={[
+              "transition-colors hover:text-clay",
+              item.mega === "peninsulas" && "mega-menu-trigger",
+            ]}
+            href={item.href}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a
+        class="hidden text-sm font-semibold text-whitewash/80 transition group-hover:text-ink-soft hover:text-clay md:inline-flex"
+        href={languageHref}
+      >
+        {otherLocale.toUpperCase()}
+      </a>
+      <a
+        href={planHref}
+        class="hidden rounded-full bg-clay px-4 py-2 text-sm font-semibold text-whitewash transition hover:bg-clay-deep focus:outline-none focus:ring-2 focus:ring-clay focus:ring-offset-2 focus:ring-offset-whitewash md:inline-flex"
+      >
+        {t.nav.plan}
+      </a>
+      <button
+        type="button"
+        data-mobile-menu-open
+        aria-label="Open menu"
+        aria-controls="mobile-menu"
+        class="-mr-1 p-2 text-whitewash transition-colors duration-300 group-hover:text-aegean-deep md:hidden"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M3 6h18M3 12h18M3 18h18" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="mega-menu-panel absolute inset-x-0 top-full hidden border-t border-sand-deep/30 bg-whitewash/95 backdrop-blur md:block">
+    <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div class="grid grid-cols-3 gap-4 lg:gap-6">
+        {
+          peninsulas.map((peninsula) => (
+            <a
+              href={localizePath(`/peninsulas/${peninsula.slug}`, locale)}
+              class="group/card relative block aspect-3/4 overflow-hidden rounded-2xl"
+            >
+              <img
+                class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover/card:scale-105"
+                src={peninsula.image.src}
+                alt={peninsula.image.alt}
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-linear-to-t from-aegean-deep/85 via-aegean-deep/25 to-transparent" />
+              <div class="absolute inset-0 flex flex-col justify-end p-6 text-whitewash">
+                <h3 class="font-serif text-2xl font-medium leading-none lg:text-3xl">
+                  {peninsula.name}
+                </h3>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</header>
+
+<div
+  id="mobile-menu"
+  class="mobile-menu fixed inset-0 z-40 flex flex-col bg-whitewash md:hidden"
+  data-mobile-menu
+  aria-hidden="true"
+>
+  <div class="flex items-center justify-between border-b border-sand-deep/30 px-4 py-4 sm:px-6">
+    <a href={homeHref} class="font-serif text-lg font-medium text-aegean-deep">
+      i<span class="italic text-clay">Love</span> Chalkidiki
+    </a>
+    <button
+      type="button"
+      data-mobile-menu-close
+      aria-label="Close menu"
+      class="-mr-1 p-2 text-ink transition hover:text-clay"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        class="h-6 w-6"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
+  </div>
+
+  <nav
+    class="flex-1 overflow-y-auto px-6 pt-10 pb-6 sm:px-8"
+    aria-label="Mobile navigation"
+  >
+    <ul class="space-y-8">
+      {
+        navItems.map((item) => (
+          <li>
+            <a
+              class="block font-serif text-3xl font-medium uppercase leading-none text-aegean-deep transition hover:text-clay sm:text-4xl"
+              href={item.href}
+            >
+              {item.label}
+            </a>
+            {item.mega === "peninsulas" && (
+              <ul class="mt-4 space-y-2">
+                {peninsulas.map((p) => (
+                  <li>
+                    <a
+                      class="flex items-center gap-2 text-base text-ink-soft transition hover:text-clay-deep"
+                      href={localizePath(`/peninsulas/${p.slug}`, locale)}
+                    >
+                      <span class="h-px w-4 bg-sand-deep" aria-hidden="true" />
+                      {p.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  <div class="border-t border-sand-deep/30 px-6 py-5 sm:px-8">
+    <div class="flex items-center justify-between gap-3">
+      <a
+        href={languageHref}
+        class="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft transition hover:text-clay"
+      >
+        {otherLocale.toUpperCase()}
+      </a>
+      <a
+        href={planHref}
+        class="rounded-full bg-clay px-5 py-2.5 text-sm font-semibold text-whitewash transition hover:bg-clay-deep focus:outline-none focus:ring-2 focus:ring-clay focus:ring-offset-2 focus:ring-offset-whitewash"
+      >
+        {t.nav.plan}
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const openBtn = document.querySelector<HTMLButtonElement>("[data-mobile-menu-open]");
+  const closeBtn = document.querySelector<HTMLButtonElement>("[data-mobile-menu-close]");
+  const menu = document.querySelector<HTMLElement>("[data-mobile-menu]");
+
+  if (openBtn && closeBtn && menu) {
+    const open = () => {
+      menu.setAttribute("data-open", "");
+      menu.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    };
+    const close = () => {
+      menu.removeAttribute("data-open");
+      menu.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    };
+
+    openBtn.addEventListener("click", open);
+    closeBtn.addEventListener("click", close);
+
+    menu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", close);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && menu.hasAttribute("data-open")) {
+        close();
+      }
+    });
+  }
+</script>

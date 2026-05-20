@@ -1,0 +1,200 @@
+---
+import type { MapPin } from "../lib/travel-home";
+
+type Props = {
+  center: [number, number];
+  zoom: number;
+  pins: MapPin[];
+  mapId: string;
+};
+
+const { center, zoom, pins, mapId } = Astro.props;
+const config = JSON.stringify({ center, zoom, pins });
+---
+
+<div
+  id={`map-${mapId}`}
+  class="h-105 w-full overflow-hidden rounded-2xl border border-sand-deep/40 sm:h-130"
+  data-map
+  data-map-config={config}
+></div>
+
+<script>
+  import maplibregl from "maplibre-gl";
+  import "maplibre-gl/dist/maplibre-gl.css";
+
+  type Pin = {
+    name: string;
+    category: string;
+    coords: [number, number];
+    image: string;
+  };
+
+  type MapConfig = {
+    center: [number, number];
+    zoom: number;
+    pins: Pin[];
+  };
+
+  function escapeHtml(str: string) {
+    return str.replace(/[&<>"']/g, (ch) =>
+      ch === "&"
+        ? "&amp;"
+        : ch === "<"
+          ? "&lt;"
+          : ch === ">"
+            ? "&gt;"
+            : ch === '"'
+              ? "&quot;"
+              : "&#39;",
+    );
+  }
+
+  function buildMarker(pin: Pin) {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "ilove-marker";
+    el.setAttribute("aria-label", pin.name);
+    const img = document.createElement("img");
+    img.src = pin.image;
+    img.alt = "";
+    img.loading = "lazy";
+    el.appendChild(img);
+    return el;
+  }
+
+  function buildPopupHtml(pin: Pin) {
+    const name = escapeHtml(pin.name);
+    const category = escapeHtml(pin.category);
+    const image = escapeHtml(pin.image);
+    return `
+      <div class="ilove-popup">
+        <img src="${image}" alt="" loading="lazy" />
+        <div class="ilove-popup__body">
+          <strong>${name}</strong>
+          <span>${category}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function initMaps() {
+    document.querySelectorAll<HTMLElement>("[data-map]").forEach((el) => {
+      if (el.dataset.ready === "true") return;
+      const raw = el.dataset.mapConfig;
+      if (!raw) return;
+
+      let config: MapConfig;
+      try {
+        config = JSON.parse(raw) as MapConfig;
+      } catch {
+        return;
+      }
+
+      el.dataset.ready = "true";
+
+      const map = new maplibregl.Map({
+        container: el,
+        style: "https://tiles.openfreemap.org/styles/liberty",
+        center: config.center,
+        zoom: config.zoom,
+      });
+
+      map.addControl(
+        new maplibregl.NavigationControl({ showCompass: false }),
+        "top-right",
+      );
+
+      config.pins.forEach((pin) => {
+        const popup = new maplibregl.Popup({
+          offset: 22,
+          closeButton: false,
+        }).setHTML(buildPopupHtml(pin));
+
+        new maplibregl.Marker({ element: buildMarker(pin), anchor: "bottom" })
+          .setLngLat(pin.coords)
+          .setPopup(popup)
+          .addTo(map);
+      });
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMaps, { once: true });
+  } else {
+    initMaps();
+  }
+</script>
+
+<style is:global>
+  .ilove-marker {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 2px solid #c75b3f;
+    border-radius: 9999px;
+    background: #fbf8f2;
+    box-shadow: 0 6px 14px rgba(14, 61, 87, 0.25);
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      transform 200ms ease,
+      box-shadow 200ms ease;
+    transform-origin: center bottom;
+  }
+
+  .ilove-marker img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+  }
+
+  .ilove-marker:hover,
+  .ilove-marker:focus-visible {
+    transform: scale(1.12);
+    box-shadow: 0 8px 18px rgba(14, 61, 87, 0.35);
+    outline: none;
+  }
+
+  .ilove-popup {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-width: 200px;
+  }
+
+  .ilove-popup img {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .ilove-popup__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ilove-popup__body strong {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 15px;
+    color: #0e3d57;
+    line-height: 1.2;
+  }
+
+  .ilove-popup__body span {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #51606a;
+  }
+
+  .maplibregl-popup-content {
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+</style>

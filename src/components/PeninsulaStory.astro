@@ -1,0 +1,130 @@
+---
+import type { Story } from "../lib/travel-home";
+
+type Props = {
+  stories?: Story[];
+  groupId: string;
+};
+
+const { stories, groupId } = Astro.props;
+const items: Story[] = Array.isArray(stories) ? stories : [];
+---
+
+{
+  items.length > 0 && (
+    <section class="bg-whitewash px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+      <div class="mx-auto max-w-6xl">
+        <div class="grid gap-12 lg:grid-cols-2 lg:gap-16">
+          <div class="flex flex-col gap-24 lg:gap-32">
+            {items.map((story, index) => (
+              <article
+                class="lg:flex lg:min-h-[80vh] lg:flex-col lg:justify-center"
+                data-story-section={groupId}
+                data-story-index={index}
+              >
+                <p class="text-base text-ink-soft">{story.eyebrow}</p>
+                <h2 class="mt-3 font-serif text-4xl font-medium uppercase leading-[0.95] text-aegean-deep sm:text-5xl lg:text-6xl">
+                  {story.title}
+                </h2>
+                <div class="mt-8 space-y-5 text-base leading-7 text-ink-soft">
+                  {(story.points ?? []).map((point) => (
+                    <p>
+                      <strong class="text-ink">{point.title}:</strong> {point.body}
+                    </p>
+                  ))}
+                </div>
+                {story.note && (
+                  <p class="mt-6 text-sm italic text-ink-soft">{story.note}</p>
+                )}
+                <img
+                  class="mt-10 aspect-square w-full rounded-2xl object-cover lg:hidden"
+                  src={story.image.src}
+                  alt={story.image.alt}
+                  loading="lazy"
+                />
+              </article>
+            ))}
+          </div>
+
+          <div class="hidden lg:block">
+            <div class="sticky top-28">
+              <div class="relative aspect-square overflow-hidden rounded-2xl">
+                {items.map((story, index) => (
+                  <img
+                    class="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out"
+                    data-story-image={groupId}
+                    data-story-image-index={index}
+                    src={story.image.src}
+                    alt={story.image.alt}
+                    style={`opacity:${index === 0 ? 1 : 0}`}
+                    loading="lazy"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<script is:inline define:vars={{ groupId }}>
+  (function () {
+    function init() {
+      const sections = Array.from(
+        document.querySelectorAll(`[data-story-section="${groupId}"]`),
+      );
+      const images = Array.from(
+        document.querySelectorAll(`[data-story-image="${groupId}"]`),
+      );
+
+      if (!sections.length || !images.length) return;
+
+      let activeIndex = -1;
+      let scheduled = false;
+
+      function setActive(idx) {
+        if (idx === activeIndex) return;
+        activeIndex = idx;
+        for (const img of images) {
+          const imgIdx = Number(img.getAttribute("data-story-image-index"));
+          img.style.opacity = imgIdx === idx ? "1" : "0";
+        }
+      }
+
+      function update() {
+        scheduled = false;
+        const target = window.innerHeight / 2;
+        let bestIdx = 0;
+        let bestDist = Infinity;
+        for (const section of sections) {
+          const rect = section.getBoundingClientRect();
+          const center = rect.top + rect.height / 2;
+          const dist = Math.abs(center - target);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestIdx = Number(section.getAttribute("data-story-index"));
+          }
+        }
+        setActive(bestIdx);
+      }
+
+      function onScroll() {
+        if (scheduled) return;
+        scheduled = true;
+        window.requestAnimationFrame(update);
+      }
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      update();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init, { once: true });
+    } else {
+      init();
+    }
+  })();
+</script>
