@@ -85,6 +85,15 @@ img {
     transform 250ms ease;
 }
 
+.mega-menu-panel::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 28px;
+}
+
 header:has(.mega-menu-trigger:hover) .mega-menu-panel,
 header:has(.mega-menu-trigger:focus-visible) .mega-menu-panel,
 .mega-menu-panel:hover,
@@ -92,6 +101,11 @@ header:has(.mega-menu-trigger:focus-visible) .mega-menu-panel,
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+}
+
+header:has(.mega-menu-trigger:hover) .mega-menu-panel::before,
+.mega-menu-panel:hover::before {
+  pointer-events: auto;
 }
 
 .mobile-menu {
