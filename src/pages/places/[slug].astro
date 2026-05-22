@@ -1,0 +1,129 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PlaceCard from "../../components/PlaceCard.astro";
+import {
+  getPlacePins,
+  getPlaceBySlug,
+  getRelatedPlaces,
+  getPeninsulaNameFromSlug,
+} from "../../lib/travel-home";
+import { ui } from "../../lib/i18n";
+
+export function getStaticPaths() {
+  return getPlacePins().map((pin) => ({
+    params: { slug: pin.slug! },
+    props: { pin },
+  }));
+}
+
+const { pin } = Astro.props;
+const place = getPlaceBySlug(pin.slug!) ?? pin;
+const related = getRelatedPlaces(place.slug!, 3);
+const peninsulaName = getPeninsulaNameFromSlug(place.peninsulaSlug);
+const t = ui.en;
+---
+
+<BaseLayout title={place.name} description={place.excerpt ?? place.name} locale="en">
+  <article class="bg-whitewash">
+    <section class="px-4 pt-28 pb-10 sm:px-6 lg:px-8 lg:pt-36 lg:pb-14">
+      <div class="mx-auto max-w-4xl text-center">
+        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-clay-deep">
+          {place.category}
+        </p>
+        <h1 class="mt-3 font-serif text-3xl font-medium uppercase leading-tight text-aegean-deep sm:text-4xl lg:text-5xl">
+          {place.name}
+        </h1>
+      </div>
+      <div class="mx-auto mt-10 max-w-6xl lg:mt-14">
+        {
+          place.kind === "video" && place.videoUrl ? (
+            <video
+              class="aspect-video w-full rounded-2xl object-cover"
+              src={place.videoUrl}
+              poster={place.image}
+              autoplay
+              muted
+              loop
+              playsinline
+              controls
+            />
+          ) : (
+            <img
+              class="aspect-video w-full rounded-2xl object-cover"
+              src={place.image}
+              alt={place.name}
+              loading="eager"
+            />
+          )
+        }
+      </div>
+    </section>
+
+    <section class="px-4 pb-20 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-3xl">
+        {place.excerpt && (
+          <p class="text-lg leading-8 text-ink/80">{place.excerpt}</p>
+        )}
+        {
+          place.body && place.body.length > 0 && (
+            <div class="mt-8 space-y-6 text-base leading-7 text-ink-soft">
+              {place.body.map((paragraph) => <p>{paragraph}</p>)}
+            </div>
+          )
+        }
+
+        <dl class="mt-12 grid gap-4 border-t border-sand-deep/30 pt-8 text-sm sm:grid-cols-2">
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-[0.14em] text-clay-deep">
+              {t.places.inPeninsula}
+            </dt>
+            <dd class="mt-1">
+              <a
+                class="font-semibold text-aegean hover:text-clay-deep"
+                href={`/peninsulas/${place.peninsulaSlug}`}
+              >
+                {peninsulaName}
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-[0.14em] text-clay-deep">
+              {place.category}
+            </dt>
+            <dd class="mt-1 text-ink-soft">{place.name}</dd>
+          </div>
+        </dl>
+
+        <div class="mt-10 flex flex-wrap gap-3">
+          <a
+            class="rounded-lg bg-aegean-deep px-6 py-3 text-sm font-semibold text-whitewash transition hover:bg-aegean"
+            href="/map"
+          >
+            {t.places.openOnMap} &rarr;
+          </a>
+          <a
+            class="rounded-lg border border-aegean-deep/30 px-6 py-3 text-sm font-semibold text-aegean-deep transition hover:border-clay hover:text-clay-deep"
+            href="/places"
+          >
+            &larr; {t.places.back}
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {
+      related.length > 0 && (
+        <section class="border-t border-sand-deep/30 px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+          <div class="mx-auto max-w-6xl">
+            <h2 class="font-serif text-3xl font-medium uppercase leading-tight text-aegean-deep sm:text-4xl">
+              {t.places.related}
+            </h2>
+            <div class="mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((p) => <PlaceCard pin={p} locale="en" />)}
+            </div>
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>

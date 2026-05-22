@@ -1,0 +1,125 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PlaceCard from "../../components/PlaceCard.astro";
+import { getAllMapPins, type MapPin } from "../../lib/travel-home";
+import { ui } from "../../lib/i18n";
+
+const pins = getAllMapPins();
+const t = ui.en;
+
+type FilterChip = { key: "all" | MapPin["kind"]; label: string };
+const filters: FilterChip[] = [
+  { key: "all", label: t.map.filters.all },
+  { key: "stay", label: t.map.filters.stay },
+  { key: "taverna", label: t.map.filters.taverna },
+  { key: "experience", label: t.map.filters.experience },
+  { key: "journal", label: t.map.filters.journal },
+  { key: "photo", label: t.map.filters.photo },
+  { key: "video", label: t.map.filters.video },
+];
+---
+
+<BaseLayout title={t.places.pageTitle} description={t.places.pageDescription} locale="en">
+  <section class="px-4 pt-28 pb-10 sm:px-6 lg:px-8 lg:pt-36">
+    <div class="mx-auto max-w-4xl text-center">
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-clay-deep">
+        {t.places.eyebrow}
+      </p>
+      <h1 class="mt-3 font-serif text-4xl font-medium uppercase leading-tight text-aegean-deep sm:text-5xl lg:text-6xl">
+        {t.places.title}
+      </h1>
+      <p class="mx-auto mt-5 max-w-xl text-base leading-7 text-ink-soft">
+        {t.places.subtitle}
+      </p>
+    </div>
+  </section>
+
+  <section class="sticky top-[68px] z-20 border-y border-sand-deep/40 bg-whitewash/95 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8" data-places-filters>
+      {
+        filters.map((filter, i) => (
+          <button
+            type="button"
+            data-places-filter={filter.key}
+            class:list={[
+              "shrink-0 rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition",
+              i === 0
+                ? "border-clay bg-clay text-whitewash"
+                : "border-sand-deep/60 text-ink-soft hover:border-clay hover:text-clay-deep",
+            ]}
+            aria-pressed={i === 0 ? "true" : "false"}
+          >
+            {filter.label}
+          </button>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+    <div class="mx-auto max-w-6xl">
+      <div class="grid gap-12 sm:grid-cols-2 lg:grid-cols-3" data-places-grid>
+        {pins.map((pin) => <PlaceCard pin={pin} locale="en" />)}
+      </div>
+      <p class="mt-10 hidden text-center text-sm text-ink-soft" data-places-empty>
+        {t.places.empty}
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  function initPlacesFilters() {
+    const filterButtons = document.querySelectorAll<HTMLButtonElement>(
+      "[data-places-filter]",
+    );
+    const cards = document.querySelectorAll<HTMLElement>("[data-place-card]");
+    const empty = document.querySelector<HTMLElement>("[data-places-empty]");
+    if (!filterButtons.length || !cards.length) return;
+
+    const apply = (key: string) => {
+      let visible = 0;
+      cards.forEach((card) => {
+        const kind = card.getAttribute("data-kind");
+        const match = key === "all" || kind === key;
+        card.style.display = match ? "" : "none";
+        if (match) visible += 1;
+      });
+      if (empty) empty.classList.toggle("hidden", visible > 0);
+      filterButtons.forEach((btn) => {
+        const active = btn.getAttribute("data-places-filter") === key;
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+        if (active) {
+          btn.classList.remove(
+            "border-sand-deep/60",
+            "text-ink-soft",
+            "hover:border-clay",
+            "hover:text-clay-deep",
+          );
+          btn.classList.add("border-clay", "bg-clay", "text-whitewash");
+        } else {
+          btn.classList.remove("border-clay", "bg-clay", "text-whitewash");
+          btn.classList.add(
+            "border-sand-deep/60",
+            "text-ink-soft",
+            "hover:border-clay",
+            "hover:text-clay-deep",
+          );
+        }
+      });
+    };
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.getAttribute("data-places-filter");
+        if (key) apply(key);
+      });
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPlacesFilters, { once: true });
+  } else {
+    initPlacesFilters();
+  }
+</script>

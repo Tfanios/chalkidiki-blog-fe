@@ -53,12 +53,27 @@ export type Peninsula = {
   zoom: number;
 };
 
+export type MapPinKind =
+  | "stay"
+  | "taverna"
+  | "experience"
+  | "journal"
+  | "photo"
+  | "video";
+
 export type MapPin = {
+  id: string;
+  kind: MapPinKind;
+  slug?: string;
   name: string;
   category: string;
   peninsulaSlug: string;
   coords: [number, number];
   image: string;
+  excerpt?: string;
+  body?: string[];
+  href?: string;
+  videoUrl?: string;
 };
 
 export type Testimonial = {
@@ -367,65 +382,252 @@ export const peninsulas: Peninsula[] = [
 
 export const mapPins: MapPin[] = [
   {
+    id: "stay-afytos",
+    kind: "stay",
+    slug: "afytos-stone-stay",
     name: "Afytos Stone Stay",
     category: "Stay",
     peninsulaSlug: "kassandra",
     coords: [23.44, 40.1],
     image:
       "https://images.unsplash.com/photo-1601581875309-fafbf2d3ed3a?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "A village stay with stone walls, sea-facing breakfasts, and a five-minute walk to dinner.",
+    href: "/peninsulas/kassandra",
   },
   {
+    id: "experience-honey-road",
+    kind: "experience",
+    slug: "honey-road",
     name: "The honey road",
     category: "Experience",
     peninsulaSlug: "kassandra",
     coords: [23.4, 40.08],
     image:
       "https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "Pine honey, thyme honey, and the small roadside shops that explain the difference.",
   },
   {
+    id: "stay-vourvourou",
+    kind: "stay",
+    slug: "vourvourou-pine-rooms",
     name: "Vourvourou Pine Rooms",
     category: "Stay",
     peninsulaSlug: "sithonia",
     coords: [23.79, 40.2],
     image:
       "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "Simple rooms under the pines, best for early swims and unhurried taverna evenings.",
+    href: "/peninsulas/sithonia",
   },
   {
+    id: "taverna-month",
+    kind: "taverna",
+    slug: "months-table",
     name: "This month's table",
     category: "Taverna",
     peninsulaSlug: "sithonia",
     coords: [23.78, 40.08],
     image:
       "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "On Sithonia's western coast — grilled sardines, tomato fritters, a cold carafe of house white.",
+    href: "/blog/afytos-without-losing-the-village",
   },
   {
+    id: "experience-olive-harvest",
+    kind: "experience",
+    slug: "olive-harvest-morning",
     name: "Olive harvest morning",
     category: "Experience",
     peninsulaSlug: "sithonia",
     coords: [23.55, 40.3],
     image:
       "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "A family grove outside Ormylia, strong coffee, and oil tasted while it is still peppery.",
   },
   {
+    id: "stay-ammouliani",
+    kind: "stay",
+    slug: "ammouliani-salt-house",
     name: "Ammouliani Salt House",
     category: "Stay",
     peninsulaSlug: "mount-athos",
     coords: [23.89, 40.32],
     image:
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "A pared-back guesthouse near the ferry, run by a family who know every quiet cove.",
+    href: "/peninsulas/mount-athos",
   },
   {
+    id: "experience-fish-market",
+    kind: "experience",
+    slug: "morning-fish-market",
     name: "Morning fish market",
     category: "Experience",
     peninsulaSlug: "mount-athos",
     coords: [23.88, 40.35],
     image:
       "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "What to buy, what to ask, and which nearby grill will cook it without ceremony.",
+  },
+  {
+    id: "journal-sithonia-western-coast",
+    kind: "journal",
+    name: "The quiet case for Sithonia's western coast",
+    category: "Journal",
+    peninsulaSlug: "sithonia",
+    coords: [23.76, 40.05],
+    image:
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "Three tavernas, two beaches, and the late light that makes the detour make sense.",
+    href: "/blog/sithonia-western-coast-tavernas",
+  },
+  {
+    id: "journal-afytos",
+    kind: "journal",
+    name: "Where to eat in Afytos without losing the village",
+    category: "Journal",
+    peninsulaSlug: "kassandra",
+    coords: [23.43, 40.1],
+    image:
+      "https://images.unsplash.com/photo-1528712306091-ed0763094c98?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "A short list for grilled fish, tomato fritters, house wine, and tables that still feel local.",
+    href: "/blog/afytos-without-losing-the-village",
+  },
+  {
+    id: "journal-three-fingers",
+    kind: "journal",
+    name: "A first-timer's route through the three fingers",
+    category: "Journal",
+    peninsulaSlug: "kassandra",
+    coords: [23.65, 40.18],
+    image:
+      "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "How to divide a week between Kassandra, Sithonia, and the Mount Athos coastline.",
+    href: "/blog/first-timers-three-fingers-route",
+  },
+  {
+    id: "journal-ormylia",
+    kind: "journal",
+    name: "What an olive harvest morning near Ormylia teaches you",
+    category: "Journal",
+    peninsulaSlug: "sithonia",
+    coords: [23.57, 40.28],
+    image:
+      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=240&q=80",
+    excerpt:
+      "Coffee in the grove, fresh oil with a peppery finish, and the patience behind a good bottle.",
+    href: "/blog/olive-harvest-ormylia",
+  },
+  {
+    id: "photo-cove-boat",
+    kind: "photo",
+    slug: "boat-in-the-cove",
+    name: "A boat moored in a quiet cove",
+    category: "Photo",
+    peninsulaSlug: "mount-athos",
+    coords: [23.95, 40.27],
+    image:
+      "https://images.unsplash.com/photo-1501950183564-3c8bc1e856a3?auto=format&fit=crop&w=240&q=80",
+    excerpt: "From the journal's Instagram — a boat day on the eastern coast.",
+  },
+  {
+    id: "photo-lunch-table",
+    kind: "photo",
+    slug: "mediterranean-lunch",
+    name: "A Mediterranean lunch, slowly",
+    category: "Photo",
+    peninsulaSlug: "kassandra",
+    coords: [23.5, 40.02],
+    image:
+      "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=240&q=80",
+    excerpt: "Plates worth ordering for the second carafe.",
+  },
+  {
+    id: "photo-village-light",
+    kind: "photo",
+    slug: "whitewashed-walls",
+    name: "Whitewashed walls at evening",
+    category: "Photo",
+    peninsulaSlug: "kassandra",
+    coords: [23.46, 40.13],
+    image:
+      "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=240&q=80",
+    excerpt: "Coastline light from one of the editor's first trips.",
+  },
+  {
+    id: "video-aerial-coast",
+    kind: "video",
+    slug: "aerial-coast",
+    name: "Aerial pass along the coast",
+    category: "Video",
+    peninsulaSlug: "sithonia",
+    coords: [23.82, 40.15],
+    image:
+      "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?auto=format&fit=crop&w=240&q=80",
+    excerpt: "A short pass over the pine-edged coastline.",
+    videoUrl:
+      "https://videos.pexels.com/video-files/2169307/2169307-hd_1280_720_30fps.mp4",
+  },
+  {
+    id: "video-mediterranean",
+    kind: "video",
+    slug: "mediterranean-rhythms",
+    name: "Mediterranean rhythms",
+    category: "Video",
+    peninsulaSlug: "mount-athos",
+    coords: [23.93, 40.3],
+    image:
+      "https://images.unsplash.com/photo-1505765050516-f72dcac9c60a?auto=format&fit=crop&w=240&q=80",
+    excerpt: "A slow loop of waves and coves on the eastern peninsula.",
+    videoUrl:
+      "https://videos.pexels.com/video-files/4584060/4584060-uhd_2560_1440_25fps.mp4",
   },
 ];
 
 export function getMapPins(peninsulaSlug: string) {
   return mapPins.filter((pin) => pin.peninsulaSlug === peninsulaSlug);
+}
+
+export function getAllMapPins() {
+  return mapPins;
+}
+
+export function getPlacePins() {
+  return mapPins.filter((pin) => Boolean(pin.slug) && pin.kind !== "journal");
+}
+
+export function getPlaceBySlug(slug: string) {
+  return mapPins.find((pin) => pin.slug === slug && pin.kind !== "journal");
+}
+
+export function getRelatedPlaces(slug: string, limit = 3) {
+  const current = mapPins.find((pin) => pin.slug === slug);
+  if (!current) return [];
+  const candidates = mapPins.filter(
+    (pin) =>
+      pin.slug && pin.slug !== slug && pin.kind !== "journal",
+  );
+  const samePeninsula = candidates.filter(
+    (pin) => pin.peninsulaSlug === current.peninsulaSlug,
+  );
+  const otherPeninsula = candidates.filter(
+    (pin) => pin.peninsulaSlug !== current.peninsulaSlug,
+  );
+  return [...samePeninsula, ...otherPeninsula].slice(0, limit);
+}
+
+export function getPeninsulaNameFromSlug(slug: string) {
+  return peninsulas.find((p) => p.slug === slug)?.name ?? slug;
 }
 
 export const destinationsCta = {

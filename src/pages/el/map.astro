@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import GlobalMap from "../../components/GlobalMap.astro";
+import { getAllMapPins } from "../../lib/travel-home";
+import { ui } from "../../lib/i18n";
+
+const pins = getAllMapPins();
+const t = ui.el;
+---
+
+<BaseLayout title={t.map.pageTitle} description={t.map.pageDescription} locale="el">
+  <section class="px-4 pt-28 pb-6 sm:px-6 lg:px-8 lg:pt-32">
+    <div class="mx-auto max-w-6xl">
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-clay-deep">
+        {t.map.eyebrowGlobal}
+      </p>
+      <h1 class="mt-3 font-serif text-4xl font-medium uppercase leading-tight text-aegean-deep sm:text-5xl lg:text-6xl">
+        {t.map.titleGlobal}
+      </h1>
+    </div>
+  </section>
+  <GlobalMap pins={pins} locale="el" />
+</BaseLayout>

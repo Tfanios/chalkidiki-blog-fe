@@ -1,0 +1,88 @@
+---
+import { type Locale, defaultLocale, localizePath, ui } from "../lib/i18n";
+import type { MapPin } from "../lib/travel-home";
+
+type Props = {
+  pin: MapPin;
+  locale?: Locale;
+};
+
+const { pin, locale = defaultLocale } = Astro.props;
+const t = ui[locale];
+
+function resolveHref(): string | null {
+  if (pin.kind === "journal" && pin.href) {
+    return localizePath(pin.href, locale);
+  }
+  if (pin.slug) {
+    return localizePath(`/places/${pin.slug}`, locale);
+  }
+  return null;
+}
+
+const href = resolveHref();
+const isJournal = pin.kind === "journal";
+---
+
+{
+  href ? (
+    <a
+      href={href}
+      class="group block"
+      data-place-card
+      data-kind={pin.kind}
+    >
+      <div class="relative aspect-video overflow-hidden rounded-2xl">
+        <img
+          class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          src={pin.image}
+          alt={pin.name}
+          loading="lazy"
+        />
+        {pin.kind === "video" && (
+          <span class="absolute inset-0 grid place-items-center bg-aegean-deep/35">
+            <span class="grid h-12 w-12 place-items-center rounded-full bg-whitewash/95 text-aegean-deep shadow-md">
+              <svg viewBox="0 0 24 24" class="ml-0.5 h-5 w-5" fill="currentColor" aria-hidden="true">
+                <path d="M8 5v14l11-7-11-7z" />
+              </svg>
+            </span>
+          </span>
+        )}
+      </div>
+      <p class="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-clay-deep">
+        {pin.category}
+      </p>
+      <h2 class="mt-2 font-serif text-2xl font-medium leading-tight text-aegean-deep group-hover:text-aegean sm:text-3xl">
+        {pin.name}
+      </h2>
+      {pin.excerpt && (
+        <p class="mt-3 text-sm leading-6 text-ink-soft">{pin.excerpt}</p>
+      )}
+      {isJournal && (
+        <p class="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-aegean">
+          {t.places.readOnJournal} &rarr;
+        </p>
+      )}
+    </a>
+  ) : (
+    <div class="block" data-place-card data-kind={pin.kind}>
+      <div class="relative aspect-video overflow-hidden rounded-2xl">
+        <img
+          class="absolute inset-0 h-full w-full object-cover"
+          src={pin.image}
+          alt={pin.name}
+          loading="lazy"
+        />
+      </div>
+      <p class="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-clay-deep">
+        {pin.category}
+      </p>
+      <h2 class="mt-2 font-serif text-2xl font-medium leading-tight text-aegean-deep sm:text-3xl">
+        {pin.name}
+      </h2>
+      {pin.excerpt && (
+        <p class="mt-3 text-sm leading-6 text-ink-soft">{pin.excerpt}</p>
+      )}
+    </div>
+  )
+}

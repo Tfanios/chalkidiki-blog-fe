@@ -1,0 +1,371 @@
+---
+import { type Locale, defaultLocale, localizePath } from "../lib/i18n";
+import { ui } from "../lib/i18n";
+import type { MapPin } from "../lib/travel-home";
+
+type Props = {
+  pins: MapPin[];
+  locale?: Locale;
+};
+
+const { pins, locale = defaultLocale } = Astro.props;
+const t = ui[locale];
+
+const config = JSON.stringify({
+  pins: pins.map((pin) => {
+    let href: string | undefined;
+    if (pin.kind === "journal" && pin.href) {
+      href = localizePath(pin.href, locale);
+    } else if (pin.slug) {
+      href = localizePath(`/places/${pin.slug}`, locale);
+    } else if (pin.href) {
+      href = localizePath(pin.href, locale);
+    }
+    return { ...pin, href };
+  }),
+  readMore: t.map.readMore,
+});
+
+type FilterChip = { key: "all" | MapPin["kind"]; label: string };
+const filters: FilterChip[] = [
+  { key: "all", label: t.map.filters.all },
+  { key: "stay", label: t.map.filters.stay },
+  { key: "taverna", label: t.map.filters.taverna },
+  { key: "experience", label: t.map.filters.experience },
+  { key: "journal", label: t.map.filters.journal },
+  { key: "photo", label: t.map.filters.photo },
+  { key: "video", label: t.map.filters.video },
+];
+---
+
+<div class="relative" data-global-map-root>
+  <div
+    class="border-y border-sand-deep/40 bg-whitewash/95 backdrop-blur"
+  >
+    <div class="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
+      {
+        filters.map((filter, i) => (
+          <button
+            type="button"
+            data-global-map-filter={filter.key}
+            class:list={[
+              "shrink-0 rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition",
+              i === 0
+                ? "border-clay bg-clay text-whitewash"
+                : "border-sand-deep/60 text-ink-soft hover:border-clay hover:text-clay-deep",
+            ]}
+            aria-pressed={i === 0 ? "true" : "false"}
+          >
+            {filter.label}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <div
+    id="global-map"
+    data-global-map
+    data-global-map-config={config}
+    class="h-[calc(100svh-12rem)] min-h-112 w-full"
+  ></div>
+
+  <aside
+    data-global-map-panel
+    aria-hidden="true"
+    class="fixed bottom-0 left-0 right-0 z-40 max-h-[78svh] origin-bottom translate-y-full overflow-y-auto rounded-t-2xl bg-whitewash shadow-[0_-18px_40px_-12px_rgba(14,61,87,0.35)] opacity-0 pointer-events-none transition duration-300 ease-out lg:bottom-auto lg:left-auto lg:right-6 lg:top-24 lg:max-h-[calc(100svh-7rem)] lg:w-[clamp(320px,32vw,460px)] lg:origin-top-right lg:translate-x-6 lg:translate-y-0 lg:rounded-2xl lg:shadow-[0_22px_50px_-15px_rgba(14,61,87,0.35)] data-open:translate-y-0 data-open:opacity-100 data-open:pointer-events-auto lg:data-open:translate-x-0"
+  >
+    <button
+      type="button"
+      data-global-map-panel-close
+      aria-label={t.map.close}
+      class="absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-full bg-whitewash/95 text-ink shadow-md backdrop-blur transition hover:text-clay focus:outline-none focus:ring-2 focus:ring-clay"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        class="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
+
+    <div class="relative aspect-video w-full overflow-hidden bg-aegean-deep/10 lg:rounded-t-2xl">
+      <img data-global-map-panel-image class="absolute inset-0 h-full w-full object-cover" src="" alt="" />
+      <video
+        data-global-map-panel-video
+        class="absolute inset-0 hidden h-full w-full object-cover"
+        autoplay
+        muted
+        loop
+        playsinline
+      ></video>
+    </div>
+
+    <div class="p-6 sm:p-7">
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-clay-deep" data-global-map-panel-category></p>
+      <h3 class="mt-2 font-serif text-2xl font-medium leading-tight text-aegean-deep sm:text-3xl" data-global-map-panel-name></h3>
+      <p class="mt-3 text-sm leading-6 text-ink-soft" data-global-map-panel-excerpt></p>
+      <a
+        data-global-map-panel-link
+        href="#"
+        class="mt-6 hidden w-fit rounded-full bg-clay px-5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-whitewash transition hover:bg-clay-deep"
+      >
+        {t.map.readMore} &rarr;
+      </a>
+    </div>
+  </aside>
+</div>
+
+<script>
+  import maplibregl from "maplibre-gl";
+  import "maplibre-gl/dist/maplibre-gl.css";
+
+  type Pin = {
+    id: string;
+    kind: "stay" | "taverna" | "experience" | "journal" | "photo" | "video";
+    name: string;
+    category: string;
+    coords: [number, number];
+    image: string;
+    excerpt?: string;
+    href?: string;
+    videoUrl?: string;
+  };
+
+  type Config = {
+    pins: Pin[];
+    readMore: string;
+  };
+
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  function buildSvgIcon(paths: Array<{ d: string; fill?: string; stroke?: string }>) {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    for (const p of paths) {
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", p.d);
+      path.setAttribute("fill", p.fill ?? "none");
+      if (p.stroke) {
+        path.setAttribute("stroke", p.stroke);
+        path.setAttribute("stroke-width", "2");
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("stroke-linejoin", "round");
+      }
+      svg.appendChild(path);
+    }
+    return svg;
+  }
+
+  function buildBadge(kind: Pin["kind"]): SVGSVGElement | null {
+    if (kind === "photo") {
+      return buildSvgIcon([
+        {
+          d: "M4 8h3l2-2h6l2 2h3v10H4V8Z",
+          stroke: "currentColor",
+        },
+        { d: "M12 11a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z", stroke: "currentColor" },
+      ]);
+    }
+    if (kind === "journal") {
+      return buildSvgIcon([
+        {
+          d: "M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z",
+          stroke: "currentColor",
+        },
+        { d: "M9 9h6M9 13h4", stroke: "currentColor" },
+      ]);
+    }
+    return null;
+  }
+
+  function buildMarker(pin: Pin, onClick: () => void) {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = `ilove-marker ilove-marker--${pin.kind}`;
+    el.setAttribute("aria-label", pin.name);
+    el.setAttribute("data-pin-id", pin.id);
+    el.setAttribute("data-pin-kind", pin.kind);
+
+    const img = document.createElement("img");
+    img.src = pin.image;
+    img.alt = "";
+    img.loading = "lazy";
+    el.appendChild(img);
+
+    if (pin.kind === "video") {
+      const play = document.createElement("span");
+      play.className = "ilove-marker__play";
+      play.appendChild(
+        buildSvgIcon([{ d: "M8 5v14l11-7-11-7z", fill: "currentColor" }]),
+      );
+      el.appendChild(play);
+    } else {
+      const icon = buildBadge(pin.kind);
+      if (icon) {
+        const badge = document.createElement("span");
+        badge.className = "ilove-marker__badge";
+        badge.appendChild(icon);
+        el.appendChild(badge);
+      }
+    }
+
+    el.addEventListener("click", (event) => {
+      event.stopPropagation();
+      onClick();
+    });
+    return el;
+  }
+
+  function initGlobalMap() {
+    const root = document.querySelector<HTMLElement>("[data-global-map-root]");
+    const container = document.querySelector<HTMLElement>("[data-global-map]");
+    const panel = document.querySelector<HTMLElement>("[data-global-map-panel]");
+    if (!root || !container || !panel) return;
+    if (container.dataset.ready === "true") return;
+
+    const raw = container.dataset.globalMapConfig;
+    if (!raw) return;
+
+    let config: Config;
+    try {
+      config = JSON.parse(raw) as Config;
+    } catch {
+      return;
+    }
+
+    container.dataset.ready = "true";
+
+    const map = new maplibregl.Map({
+      container,
+      style: "https://tiles.openfreemap.org/styles/liberty",
+      center: [23.85, 40.15],
+      zoom: 9.2,
+    });
+
+    map.addControl(
+      new maplibregl.NavigationControl({ showCompass: false }),
+      "top-right",
+    );
+
+    const elements = {
+      image: panel.querySelector<HTMLImageElement>("[data-global-map-panel-image]"),
+      video: panel.querySelector<HTMLVideoElement>("[data-global-map-panel-video]"),
+      category: panel.querySelector<HTMLElement>("[data-global-map-panel-category]"),
+      name: panel.querySelector<HTMLElement>("[data-global-map-panel-name]"),
+      excerpt: panel.querySelector<HTMLElement>("[data-global-map-panel-excerpt]"),
+      link: panel.querySelector<HTMLAnchorElement>("[data-global-map-panel-link]"),
+      close: panel.querySelector<HTMLButtonElement>("[data-global-map-panel-close]"),
+    };
+
+    const openPanel = (pin: Pin) => {
+      if (elements.video) {
+        if (pin.kind === "video" && pin.videoUrl) {
+          elements.video.src = pin.videoUrl;
+          elements.video.classList.remove("hidden");
+          if (elements.image) elements.image.classList.add("hidden");
+        } else {
+          elements.video.removeAttribute("src");
+          elements.video.classList.add("hidden");
+          if (elements.image) elements.image.classList.remove("hidden");
+        }
+      }
+      if (elements.image) {
+        elements.image.src = pin.image;
+        elements.image.alt = pin.name;
+      }
+      if (elements.category) elements.category.textContent = pin.category;
+      if (elements.name) elements.name.textContent = pin.name;
+      if (elements.excerpt) elements.excerpt.textContent = pin.excerpt ?? "";
+      if (elements.link) {
+        if (pin.href) {
+          elements.link.href = pin.href;
+          elements.link.classList.remove("hidden");
+          elements.link.classList.add("inline-flex");
+        } else {
+          elements.link.classList.add("hidden");
+          elements.link.classList.remove("inline-flex");
+        }
+      }
+      panel.setAttribute("data-open", "");
+      panel.setAttribute("aria-hidden", "false");
+    };
+
+    const closePanel = () => {
+      panel.removeAttribute("data-open");
+      panel.setAttribute("aria-hidden", "true");
+      if (elements.video) {
+        elements.video.pause();
+        elements.video.removeAttribute("src");
+      }
+    };
+
+    elements.close?.addEventListener("click", closePanel);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && panel.hasAttribute("data-open")) {
+        closePanel();
+      }
+    });
+
+    container.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest(".ilove-marker")) {
+        closePanel();
+      }
+    });
+
+    const markers = config.pins.map((pin) => {
+      const marker = new maplibregl.Marker({
+        element: buildMarker(pin, () => openPanel(pin)),
+        anchor: "bottom",
+      })
+        .setLngLat(pin.coords)
+        .addTo(map);
+      return { pin, marker };
+    });
+
+    const filterButtons = root.querySelectorAll<HTMLButtonElement>("[data-global-map-filter]");
+    const applyFilter = (key: string) => {
+      markers.forEach(({ pin, marker }) => {
+        const el = marker.getElement();
+        if (key === "all" || pin.kind === key) {
+          el.style.display = "";
+        } else {
+          el.style.display = "none";
+        }
+      });
+      filterButtons.forEach((btn) => {
+        const active = btn.getAttribute("data-global-map-filter") === key;
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+        if (active) {
+          btn.classList.remove("border-sand-deep/60", "text-ink-soft", "hover:border-clay", "hover:text-clay-deep");
+          btn.classList.add("border-clay", "bg-clay", "text-whitewash");
+        } else {
+          btn.classList.remove("border-clay", "bg-clay", "text-whitewash");
+          btn.classList.add("border-sand-deep/60", "text-ink-soft", "hover:border-clay", "hover:text-clay-deep");
+        }
+      });
+    };
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.getAttribute("data-global-map-filter");
+        if (key) applyFilter(key);
+      });
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initGlobalMap, { once: true });
+  } else {
+    initGlobalMap();
+  }
+</script>
+
