@@ -24,6 +24,7 @@ const config = JSON.stringify({ center, zoom, pins });
   import "maplibre-gl/dist/maplibre-gl.css";
 
   type Pin = {
+    kind: MapPin["kind"];
     name: string;
     category: string;
     coords: [number, number];
@@ -53,7 +54,7 @@ const config = JSON.stringify({ center, zoom, pins });
   function buildMarker(pin: Pin) {
     const el = document.createElement("button");
     el.type = "button";
-    el.className = "ilove-marker";
+    el.className = `ilove-marker ilove-marker--${pin.kind}`;
     el.setAttribute("aria-label", pin.name);
     const img = document.createElement("img");
     img.src = pin.image;

@@ -214,6 +214,37 @@ header:has(.mega-menu-trigger:hover) .mega-menu-panel::before,
   z-index: 2;
 }
 
+.ilove-marker--beach {
+  width: 38px;
+  height: 38px;
+  box-shadow:
+    inset 0 0 0 1.5px var(--color-aegean),
+    inset 0 0 0 3px var(--color-whitewash),
+    0 1px 2px rgba(14, 61, 87, 0.2),
+    0 9px 17px -7px rgba(14, 61, 87, 0.42);
+}
+
+.ilove-marker--beach::after {
+  bottom: -4px;
+  width: 10px;
+  height: 10px;
+  background: var(--color-aegean);
+}
+
+.ilove-marker--beach img {
+  object-fit: contain;
+  padding: 3px;
+}
+
+.ilove-marker--beach:hover,
+.ilove-marker--beach:focus-visible {
+  box-shadow:
+    inset 0 0 0 1.5px var(--color-aegean),
+    inset 0 0 0 3px var(--color-whitewash),
+    0 2px 4px rgba(14, 61, 87, 0.22),
+    0 16px 28px -7px rgba(14, 61, 87, 0.5);
+}
+
 .ilove-marker__badge {
   position: absolute;
   bottom: -3px;

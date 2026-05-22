@@ -29,6 +29,7 @@ const config = JSON.stringify({
 type FilterChip = { key: "all" | MapPin["kind"]; label: string };
 const filters: FilterChip[] = [
   { key: "all", label: t.map.filters.all },
+  { key: "beach", label: t.map.filters.beach },
   { key: "stay", label: t.map.filters.stay },
   { key: "taverna", label: t.map.filters.taverna },
   { key: "experience", label: t.map.filters.experience },
@@ -127,7 +128,7 @@ const filters: FilterChip[] = [
 
   type Pin = {
     id: string;
-    kind: "stay" | "taverna" | "experience" | "journal" | "photo" | "video";
+    kind: "beach" | "stay" | "taverna" | "experience" | "journal" | "photo" | "video";
     name: string;
     category: string;
     coords: [number, number];
@@ -331,6 +332,16 @@ const filters: FilterChip[] = [
       return { pin, marker };
     });
 
+    const bounds = new maplibregl.LngLatBounds();
+    config.pins.forEach((pin) => bounds.extend(pin.coords));
+    if (!bounds.isEmpty()) {
+      map.fitBounds(bounds, {
+        padding: { top: 72, bottom: 52, left: 28, right: 28 },
+        maxZoom: 9.2,
+        duration: 0,
+      });
+    }
+
     const filterButtons = root.querySelectorAll<HTMLButtonElement>("[data-global-map-filter]");
     const applyFilter = (key: string) => {
       markers.forEach(({ pin, marker }) => {
@@ -368,4 +379,3 @@ const filters: FilterChip[] = [
     initGlobalMap();
   }
 </script>
-

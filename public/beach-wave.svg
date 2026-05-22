@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sea waves">
+  <rect width="64" height="64" rx="32" fill="#dff5f2"/>
+  <circle cx="43" cy="20" r="8" fill="#efc98c"/>
+  <path d="M12 33c5.8 0 5.8-4 11.6-4 5.8 0 5.8 4 11.6 4s5.8-4 11.6-4c2.1 0 3.4.5 5.2 1.5v17.8H12V33Z" fill="#1b8ca6"/>
+  <path d="M12 39c5.8 0 5.8 4 11.6 4 5.8 0 5.8-4 11.6-4s5.8 4 11.6 4c2.1 0 3.4-.5 5.2-1.5" fill="none" stroke="#f7f2e7" stroke-linecap="round" stroke-width="4"/>
+  <path d="M12 28c5.8 0 5.8-4 11.6-4 5.8 0 5.8 4 11.6 4s5.8-4 11.6-4c2.1 0 3.4.5 5.2 1.5" fill="none" stroke="#0e3d57" stroke-linecap="round" stroke-width="3"/>
+</svg>

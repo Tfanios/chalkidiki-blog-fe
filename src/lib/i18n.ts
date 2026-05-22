@@ -62,13 +62,14 @@ export const ui = {
     map: {
       eyebrow: "On the map",
       title: (name: string) => `${name} at a glance`,
-      subtitle: "Stays, tavernas, and small experiences worth the detour.",
+      subtitle: "Beaches, stays, tavernas, and small experiences worth the detour.",
       pageTitle: "Map",
-      pageDescription: "Every stay, taverna, experience and story on a single map.",
+      pageDescription: "Every beach, stay, taverna, experience and story on a single map.",
       eyebrowGlobal: "Chalkidiki on the map",
       titleGlobal: "Explore the whole region",
       filters: {
         all: "All",
+        beach: "Beaches",
         stay: "Stays",
         taverna: "Tavernas",
         experience: "Experiences",
@@ -124,13 +125,14 @@ export const ui = {
     map: {
       eyebrow: "Στον χάρτη",
       title: (name: string) => `${name} με μια ματιά`,
-      subtitle: "Διαμονές, ταβέρνες και μικρές εμπειρίες που αξίζουν την παράκαμψη.",
+      subtitle: "Παραλίες, διαμονές, ταβέρνες και μικρές εμπειρίες που αξίζουν την παράκαμψη.",
       pageTitle: "Χάρτης",
-      pageDescription: "Κάθε διαμονή, ταβέρνα, εμπειρία και ιστορία σε έναν χάρτη.",
+      pageDescription: "Κάθε παραλία, διαμονή, ταβέρνα, εμπειρία και ιστορία σε έναν χάρτη.",
       eyebrowGlobal: "Η Χαλκιδική στον χάρτη",
       titleGlobal: "Εξερεύνησε ολόκληρη την περιοχή",
       filters: {
         all: "Όλα",
+        beach: "Παραλίες",
         stay: "Διαμονές",
         taverna: "Ταβέρνες",
         experience: "Εμπειρίες",

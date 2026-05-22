@@ -1,10 +1,10 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PlaceCard from "../../components/PlaceCard.astro";
-import { getAllMapPins, type MapPin } from "../../lib/travel-home";
+import { getPlaceDirectoryPins, type MapPin } from "../../lib/travel-home";
 import { ui } from "../../lib/i18n";
 
-const pins = getAllMapPins();
+const pins = getPlaceDirectoryPins();
 const t = ui.en;
 
 type FilterChip = { key: "all" | MapPin["kind"]; label: string };

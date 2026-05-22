@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { chalkidikiBeaches } from "./chalkidiki-beaches";
 
 export type ImageAsset = {
   src: string;
@@ -54,6 +55,7 @@ export type Peninsula = {
 };
 
 export type MapPinKind =
+  | "beach"
   | "stay"
   | "taverna"
   | "experience"
@@ -380,6 +382,20 @@ export const peninsulas: Peninsula[] = [
   },
 ];
 
+const beachPins: MapPin[] = Object.entries(chalkidikiBeaches).flatMap(
+  ([peninsulaSlug, beaches]) =>
+    beaches.map((beach, index) => ({
+      id: `beach-${peninsulaSlug}-${index + 1}`,
+      kind: "beach",
+      name: beach.name,
+      category: "Beach",
+      peninsulaSlug,
+      coords: [beach.longitude, beach.latitude],
+      image: "/beach-wave.svg",
+      excerpt: "Approximate shoreline location.",
+    })),
+);
+
 export const mapPins: MapPin[] = [
   {
     id: "stay-afytos",
@@ -592,6 +608,7 @@ export const mapPins: MapPin[] = [
     videoUrl:
       "https://videos.pexels.com/video-files/4584060/4584060-uhd_2560_1440_25fps.mp4",
   },
+  ...beachPins,
 ];
 
 export function getMapPins(peninsulaSlug: string) {
@@ -600,6 +617,10 @@ export function getMapPins(peninsulaSlug: string) {
 
 export function getAllMapPins() {
   return mapPins;
+}
+
+export function getPlaceDirectoryPins() {
+  return mapPins.filter((pin) => pin.kind !== "beach");
 }
 
 export function getPlacePins() {
